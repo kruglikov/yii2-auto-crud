@@ -15,7 +15,7 @@
 <?php $form = ActiveForm::begin([
         'id'           => 'form-crud',
         'action'       => (Yii::$app->urlManager->enablePrettyUrl) ? '/crud/default/process' : 'index.php?r=crud/default/process',
-        'beforeSubmit' => 'c006_show_spinner',
+        //'beforeSubmit' => 'c006_show_spinner',
         'attributes'   => [ 'db_connection' => 'DB Connection' ],
     ]
 );

@@ -91,9 +91,11 @@
                 $this->redirect('/');
             $post                = $_POST['Crud'];
             $db                  = $post['db_connection'];
-            $model_override      = (isset($post['override_models'])) ? TRUE : FALSE;
-            $controller_override = (isset($post['override_controllers'])) ? TRUE : FALSE;
-            /* */
+            $model_override      = (isset($post['override_models']) && $post['override_models']=='1'  ) ? TRUE : FALSE;
+            $controller_override = (isset($post['override_controllers']) && $post['override_controllers']=='1' ) ? TRUE : FALSE;
+
+
+                /* */
             $appSetup                     = new AppSetup($db);
             $appSetup->models_path        = $post['models_path'];
             $appSetup->models_search_path = $post['models_search_path'];

@@ -83,20 +83,36 @@
         {
 
             $models = $this->connection->schema->tableNames;
+
             foreach ($models as $model) {
-                if ( $override && in_array($model, $array_exclude) )
+                if ( $override && in_array($model, $array_exclude) ){
                     continue;
-                $generator             = new \yii\gii\generators\model\Generator();
-                $generator->enableI18N = TRUE;
-                $generator->tableName  = $model;
-                $generator->modelClass = self::createModelName($model);
-                $generator->template   = 'default';
-                $generator->ns         = AppFile::useForwardSlash($this->models_path);
-                $files                 = $generator->generate();
-                $alias                 = AppFile::getFirstFolderInPath($this->models_path);
-                $path                  = Yii::getAlias('@' . $alias) . '' . str_replace($alias, '', $this->models_path);
-                $path                  = AppFile::useBackslash($path . '/' . $generator->modelClass . '.php');
-                AppFile::writeFile($path, $files[0]->content);
+                }else{
+
+                    $tableSchema = $this->connection->schema->getTableSchema($model);
+                    $pk = $tableSchema->primaryKey;
+
+                    $modelName = self::createModelName($model);
+
+                    $alias  = AppFile::getFirstFolderInPath($this->models_path);
+                    $path   = Yii::getAlias('@' . $alias) . '' . str_replace($alias, '', $this->models_path);
+                    $path   = AppFile::useBackslash($path);
+                    $modelExists = is_file(realpath($path . '/' . $modelName . '.php'));
+
+                    if($pk && !$modelExists){
+                        $generator             = new \yii\gii\generators\model\Generator();
+                        $generator->enableI18N = TRUE;
+                        $generator->tableName  = $model;
+                        $generator->modelClass = self::createModelName($model);
+                        $generator->template   = 'default';
+                        $generator->ns         = AppFile::useForwardSlash($this->models_path);
+                        $files                 = $generator->generate();
+                        $alias                 = AppFile::getFirstFolderInPath($this->models_path);
+                        $path                  = Yii::getAlias('@' . $alias) . '' . str_replace($alias, '', $this->models_path);
+                        $path                  = AppFile::useBackslash($path . '/' . $generator->modelClass . '.php');
+                        AppFile::writeFile($path, $files[0]->content);
+                    }
+                }
             }
         }
 
@@ -109,15 +125,33 @@
         {
 
             $alias  = AppFile::getFirstFolderInPath($this->models_path);
-            $path   = Yii::getAlias('@' . $alias) . '' . str_replace($alias, '', $this->models_path);
+            $path   = Yii::getAlias('@' . $alias) . '' . str_replace($alias, '', $this->controller_path);
             $path   = AppFile::useBackslash($path);
             $models = $this->connection->schema->tableNames;
+
             foreach ($models as $model) {
-                $modelName = self::createModelName($model);
-                if ( is_file(realpath($path . '/' . $modelName . '.php')) ) {
-                    if ( $override && in_array($modelName, $array_exclude) == FALSE ) {
-                        self::makeCrud($modelName);
+
+                $tableSchema = $this->connection->schema->getTableSchema($model);
+                $pk = $tableSchema->primaryKey;
+
+                if($pk){
+                    $modelName = self::createModelName($model);
+                    if($override) {
+                        if ( is_file(realpath($path . '/' . $modelName . '.php')) ) {
+                            if ( $override && in_array($modelName, $array_exclude) == FALSE ) {
+                                self::makeCrud($modelName);
+                            }
+                        }
+                    }else{
+
+                        $controllerExists = is_file(realpath($path . '/' . $modelName . 'Controller' . '.php'));
+
+
+                        if ( !$controllerExists ) {
+                            self::makeCrud($modelName);
+                        }
                     }
+
                 }
             }
 
@@ -131,7 +165,7 @@
         {
 
             $generator                   = new \yii\gii\generators\crud\Generator();
-            $generator->enableI18N       = TRUE;
+            $generator->enableI18N       = false;
             $generator->modelClass       = AppFile::useForwardSlash($this->models_path . chr(92) . $model);
             $generator->searchModelClass = AppFile::useForwardSlash($this->models_search_path . chr(92) . $model);
             $generator->controllerClass  = AppFile::useForwardSlash($this->controller_path . chr(92) . $model . 'Controller');
