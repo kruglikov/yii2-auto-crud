@@ -1,5 +1,5 @@
 {
-    "name"       : "kruglikov/yii2-auto-crud",
+    "name"       : "c006/yii2-auto-crud",
     "description": "Adds a model and crud for each table in the database",
     "type"       : "yii2-extension",
     "keywords"   : ["yii2", "extension", "widgets", "crud", "gii"],
@@ -15,7 +15,7 @@
     ],
     "autoload"   : {
         "psr-4": {
-            "kruglikov\\crud\\": ""
+            "c006\\crud\\": ""
         }
     }
 }
